@@ -48,7 +48,7 @@ EVENT_MOVE = _QEVENT_TYPE.Move
 EVENT_WINDOW_STATE_CHANGE = _QEVENT_TYPE.WindowStateChange
 EVENT_CLOSE = _QEVENT_TYPE.Close
 
-PLUGIN_DISPLAY_NAME = "Script"
+PLUGIN_DISPLAY_NAME = "FjBa Basic ID Generator"
 
 
 class FjBaBrandingManager(QObject):
