@@ -66,7 +66,7 @@ class FjBaMetallicLogo(QWidget):
         self.setMaximumSize(100, 90)
 
         self.setAttribute(
-            Qt.WA_TranslucentBackground,
+            Qt.WidgetAttribute.WA_TranslucentBackground,
             True
         )
 
@@ -90,7 +90,7 @@ class FjBaMetallicLogo(QWidget):
         painter = QPainter(self)
 
         painter.setRenderHint(
-            QPainter.Antialiasing
+            QPainter.RenderHint.Antialiasing
         )
 
         rect = self.rect()
@@ -98,7 +98,7 @@ class FjBaMetallicLogo(QWidget):
         font = QFont(
             "Segoe UI",
             27,
-            QFont.Bold
+            QFont.Weight.Bold
         )
 
         painter.setFont(font)
@@ -268,7 +268,7 @@ class AssignIDsTask(QgsTask):
 
         super().__init__(
             "Basic ID Generator",
-            QgsTask.CanCancel
+            QgsTask.Flag.CanCancel
         )
 
         self.layers = layers
@@ -322,7 +322,7 @@ class AssignIDsTask(QgsTask):
                 request = (
                     QgsFeatureRequest()
                     .setFlags(
-                        QgsFeatureRequest.NoGeometry
+                        QgsFeatureRequest.Flag.NoGeometry
                     )
                 )
 
@@ -574,7 +574,7 @@ class UltraIDGeneratorDialog(QDialog):
         )
 
         title.setAlignment(
-            Qt.AlignCenter
+            Qt.AlignmentFlag.AlignCenter
         )
 
         title.setStyleSheet("""
@@ -588,7 +588,7 @@ class UltraIDGeneratorDialog(QDialog):
         )
 
         subtitle.setAlignment(
-            Qt.AlignCenter
+            Qt.AlignmentFlag.AlignCenter
         )
 
         subtitle.setStyleSheet("""
@@ -641,7 +641,7 @@ class UltraIDGeneratorDialog(QDialog):
         self.layer_list = QListWidget()
 
         self.layer_list.setSelectionMode(
-            QListWidget.ExtendedSelection
+            QListWidget.SelectionMode.ExtendedSelection
         )
 
         for layer in self.layers:
@@ -651,12 +651,12 @@ class UltraIDGeneratorDialog(QDialog):
             )
 
             item.setData(
-                Qt.UserRole,
+                Qt.ItemDataRole.UserRole,
                 layer.id()
             )
 
             item.setCheckState(
-                Qt.Unchecked
+                Qt.CheckState.Unchecked
             )
 
             self.layer_list.addItem(
@@ -1116,7 +1116,7 @@ class UltraIDGeneratorDialog(QDialog):
             self.layer_list.item(
                 i
             ).setCheckState(
-                Qt.Checked
+                Qt.CheckState.Checked
             )
 
     # ========================================================
@@ -1132,7 +1132,7 @@ class UltraIDGeneratorDialog(QDialog):
             self.layer_list.item(
                 i
             ).setCheckState(
-                Qt.Unchecked
+                Qt.CheckState.Unchecked
             )
 
     # ========================================================
@@ -1151,11 +1151,11 @@ class UltraIDGeneratorDialog(QDialog):
 
             item = self.layer_list.item(i)
 
-            if item.checkState() != Qt.Checked:
+            if item.checkState() != Qt.CheckState.Checked:
                 continue
 
             layer_id = item.data(
-                Qt.UserRole
+                Qt.ItemDataRole.UserRole
             )
 
             layer = project.mapLayer(
@@ -1324,12 +1324,12 @@ class UltraIDGeneratorDialog(QDialog):
                                 "but it is not a text field.\n\n"
                                 "Continue anyway?"
                             ),
-                            QMessageBox.Yes
-                            | QMessageBox.No,
-                            QMessageBox.No
+                            QMessageBox.StandardButton.Yes
+                            | QMessageBox.StandardButton.No,
+                            QMessageBox.StandardButton.No
                         )
 
-                        if answer != QMessageBox.Yes:
+                        if answer != QMessageBox.StandardButton.Yes:
                             return
 
         # ----------------------------------------------------
@@ -1761,7 +1761,7 @@ class UltraIDPlugin:
             )
         )
 
-        self.dialog.exec_()
+        self.dialog.exec()
 
         self.dialog = None
 
@@ -1775,7 +1775,7 @@ def main(iface):
 
     dialog = UltraIDGeneratorDialog(iface)
 
-    dialog.exec_()
+    dialog.exec()
 
 
 def classFactory(iface):
