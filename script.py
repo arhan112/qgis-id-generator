@@ -1766,13 +1766,6 @@ class UltraIDPlugin:
         self.dialog = None
 
 
-# ============================================================
-# QGIS PLUGIN ENTRY POINT
-# ============================================================
-
-def classFactory(iface):
-
-    return UltraIDPlugin(iface)
     
 # ============================================================
 # QGIS PLUGIN ENTRY POINT
