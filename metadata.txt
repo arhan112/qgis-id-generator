@@ -1,0 +1,17 @@
+[general]
+name=FjBa Basic ID Generator
+qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
+description=Generate sequential feature IDs for one or multiple vector layers with optional prefixes, custom start values, step values, sorting, overwrite control, progress tracking, cancellation, and dark/light themes.
+version=1.0.0
+author=FjBa
+email=fjoartbajraktari15@gmail.com
+repository=
+tracker=
+homepage=
+category=Vector
+icon=icon.png
+experimental=False
+deprecated=False
+tags=id,identifier,feature id,field,vector,attribute,numbering,sequential ids,bulk editing,automation
+about=Basic ID Generator - FjBa is a lightweight QGIS plugin for quickly creating and assigning sequential IDs to vector-layer features. It supports multiple selected layers, optional text prefixes, custom starting values, custom increments, sorting, overwrite protection, background processing, progress reporting, task cancellation, and a dark/light interface.
