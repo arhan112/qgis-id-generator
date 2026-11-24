@@ -10,8 +10,14 @@ import logging
 
 from qgis.PyQt.QtCore import Qt, QObject, QEvent
 from qgis.PyQt.QtGui import QIcon, QPixmap
+
+try:
+    # Qt 6 provides QAction from QtGui; Qt 5 provides it from QtWidgets.
+    from qgis.PyQt.QtGui import QAction
+except ImportError:  # Compatibility with QGIS builds using PyQt5.
+    from qgis.PyQt.QtWidgets import QAction
+
 from qgis.PyQt.QtWidgets import (
-    QAction,
     QApplication,
     QDialog,
     QWidget,
@@ -22,6 +28,25 @@ from qgis.PyQt.QtWidgets import (
 )
 
 LOGGER = logging.getLogger(__name__)
+
+# Resolve scoped Qt enums when available, while retaining Qt 5 compatibility.
+_QT_ALIGNMENT = getattr(Qt, "AlignmentFlag", Qt)
+_QT_WIDGET_ATTRIBUTE = getattr(Qt, "WidgetAttribute", Qt)
+_QT_MOUSE_BUTTON = getattr(Qt, "MouseButton", Qt)
+_QT_ASPECT_RATIO = getattr(Qt, "AspectRatioMode", Qt)
+_QT_TRANSFORM = getattr(Qt, "TransformationMode", Qt)
+_QEVENT_TYPE = getattr(QEvent, "Type", QEvent)
+
+ALIGN_CENTER = _QT_ALIGNMENT.AlignCenter
+WA_TRANSPARENT_FOR_MOUSE = _QT_WIDGET_ATTRIBUTE.WA_TransparentForMouseEvents
+WA_NO_SYSTEM_BACKGROUND = _QT_WIDGET_ATTRIBUTE.WA_NoSystemBackground
+KEEP_ASPECT_RATIO = _QT_ASPECT_RATIO.KeepAspectRatio
+SMOOTH_TRANSFORMATION = _QT_TRANSFORM.SmoothTransformation
+EVENT_SHOW = _QEVENT_TYPE.Show
+EVENT_RESIZE = _QEVENT_TYPE.Resize
+EVENT_MOVE = _QEVENT_TYPE.Move
+EVENT_WINDOW_STATE_CHANGE = _QEVENT_TYPE.WindowStateChange
+EVENT_CLOSE = _QEVENT_TYPE.Close
 
 PLUGIN_DISPLAY_NAME = "Script"
 
@@ -72,19 +97,19 @@ class FjBaBrandingManager(QObject):
     def eventFilter(self, watched, event):
 
         try:
-            if event.type() == QEvent.Show:
+            if event.type() == EVENT_SHOW:
 
                 if self.active and isinstance(watched, QWidget):
                     self.register_window(watched)
 
             elif event.type() in (
-                QEvent.Resize,
-                QEvent.Move,
-                QEvent.WindowStateChange,
+                EVENT_RESIZE,
+                EVENT_MOVE,
+                EVENT_WINDOW_STATE_CHANGE,
             ):
                 self._position_logo(watched)
 
-            elif event.type() == QEvent.Close:
+            elif event.type() == EVENT_CLOSE:
                 self._remove_window(watched)
 
         except RuntimeError:
@@ -116,16 +141,16 @@ class FjBaBrandingManager(QObject):
             label.setObjectName("fjbaBrandOverlay")
 
             label.setAttribute(
-                Qt.WA_TransparentForMouseEvents,
+                WA_TRANSPARENT_FOR_MOUSE,
                 True
             )
 
             label.setAttribute(
-                Qt.WA_NoSystemBackground,
+                WA_NO_SYSTEM_BACKGROUND,
                 True
             )
 
-            label.setAlignment(Qt.AlignCenter)
+            label.setAlignment(ALIGN_CENTER)
             label.setStyleSheet(
                 "background: transparent; border: none;"
             )
@@ -133,8 +158,8 @@ class FjBaBrandingManager(QObject):
             scaled = self.logo.scaled(
                 112,
                 48,
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation
+                KEEP_ASPECT_RATIO,
+                SMOOTH_TRANSFORMATION
             )
 
             label.setPixmap(scaled)
@@ -187,6 +212,16 @@ class FjBaBrandingManager(QObject):
         record = self.windows.pop(id(widget), None)
 
         if record:
+            window_ref = record.get("window")
+            window = window_ref() if window_ref is not None else None
+            if window is not None:
+                try:
+                    window.removeEventFilter(self)
+                except RuntimeError:
+                    LOGGER.debug(
+                        "Could not detach the window event filter.",
+                        exc_info=True
+                    )
             try:
                 record["label"].deleteLater()
             except RuntimeError:
@@ -205,6 +240,16 @@ class FjBaBrandingManager(QObject):
         self.active = False
 
         for record in list(self.windows.values()):
+            window_ref = record.get("window")
+            window = window_ref() if window_ref is not None else None
+            if window is not None:
+                try:
+                    window.removeEventFilter(self)
+                except RuntimeError:
+                    LOGGER.debug(
+                        "Could not detach a window event filter during unload.",
+                        exc_info=True
+                    )
             try:
                 record["label"].deleteLater()
             except RuntimeError:
@@ -391,7 +436,7 @@ class FjBaGeneratedPlugin:
         layout.setSpacing(13)
 
         logo_label = QLabel()
-        logo_label.setAlignment(Qt.AlignCenter)
+        logo_label.setAlignment(ALIGN_CENTER)
         logo_label.setMinimumHeight(145)
 
         pixmap = QPixmap(self.logo_path)
@@ -401,8 +446,8 @@ class FjBaGeneratedPlugin:
                 pixmap.scaled(
                     340,
                     135,
-                    Qt.KeepAspectRatio,
-                    Qt.SmoothTransformation
+                    KEEP_ASPECT_RATIO,
+                    SMOOTH_TRANSFORMATION
                 )
             )
 
@@ -410,7 +455,7 @@ class FjBaGeneratedPlugin:
 
         title = QLabel(PLUGIN_DISPLAY_NAME)
         title.setObjectName("title")
-        title.setAlignment(Qt.AlignCenter)
+        title.setAlignment(ALIGN_CENTER)
         title.setWordWrap(True)
 
         layout.addWidget(title)
@@ -420,7 +465,7 @@ class FjBaGeneratedPlugin:
         )
 
         subtitle.setObjectName("subtitle")
-        subtitle.setAlignment(Qt.AlignCenter)
+        subtitle.setAlignment(ALIGN_CENTER)
 
         layout.addWidget(subtitle)
 
@@ -652,14 +697,14 @@ class FjBaGeneratedPlugin:
 
         if not pixmap.isNull():
             logo = QLabel()
-            logo.setAlignment(Qt.AlignCenter)
+            logo.setAlignment(ALIGN_CENTER)
 
             logo.setPixmap(
                 pixmap.scaled(
                     260,
                     115,
-                    Qt.KeepAspectRatio,
-                    Qt.SmoothTransformation
+                    KEEP_ASPECT_RATIO,
+                    SMOOTH_TRANSFORMATION
                 )
             )
 
@@ -674,7 +719,7 @@ class FjBaGeneratedPlugin:
             "automatically branded with the FjBa logo."
         )
 
-        description.setAlignment(Qt.AlignCenter)
+        description.setAlignment(ALIGN_CENTER)
         description.setWordWrap(True)
 
         layout.addWidget(description)
@@ -690,3 +735,8 @@ class FjBaGeneratedPlugin:
         dialog.show()
         dialog.raise_()
         dialog.activateWindow()
+
+
+def classFactory(iface):
+    """Create the plugin instance required by QGIS."""
+    return FjBaGeneratedPlugin(iface)
