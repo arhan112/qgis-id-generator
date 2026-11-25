@@ -103,7 +103,7 @@ You can also install the plugin from a ZIP package using **Install from ZIP**.
 
 ## 📝 Version
 
-**1.0.0 — Initial Release**
+**1.0.3 — Initial Release**
 
 ## 👤 Author
 
